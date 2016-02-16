@@ -1,0 +1,5 @@
+primary:
+  build: . 
+  command: ["sh", "-c", "exec circuit start -a $$HOSTNAME:2233"]
+  volumes:
+    - ../../../:/opt/farmm 
