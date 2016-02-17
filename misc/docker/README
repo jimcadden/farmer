@@ -1,0 +1,10 @@
+# circuit cluser in docker
+
+start the primary:
+``` docker-compose ip
+
+spawn a secondary:
+``` ./spawn {circuit url}
+
+attach to tty:
+``` ./attach {container id}
