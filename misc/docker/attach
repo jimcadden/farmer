@@ -1,0 +1,5 @@
+#!/bin/bash
+PRIMARY=$( docker ps | grep primary | awk -F ' ' '{print $1}' )
+docker exec -i -t $PRIMARY  /bin/bash -l
+
+
