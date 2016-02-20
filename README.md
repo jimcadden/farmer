@@ -1,2 +1,2 @@
 # farmer
-fast alloc/release management of elastic resource
+Fast Alloc/Release Management of Elastic Resource
