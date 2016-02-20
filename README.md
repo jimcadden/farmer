@@ -1,2 +1,2 @@
-# farmm
-fast allocate-n-release machine management 
+# farmer
+fast alloc/release management of elastic resource
