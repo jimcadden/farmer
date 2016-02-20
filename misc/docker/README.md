@@ -1,15 +1,10 @@
 # circuit cluser with docker
 
-start the primary:
+start the cluster:
 ```
 docker-compose up
 ```
-spawn a secondary:
-```
-./spawn {circuit url}
-```
-
 attach to a container:
 ```
-./attach {container id}
+./attach_to_CID {container id}
 ```
