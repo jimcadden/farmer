@@ -54,8 +54,8 @@ func main() {
 	println("circuit: dialing into", os.Args[1])
 	c := client.Dial(os.Args[1], nil)
 
-	prereqs := []string{"cat", "qemu-system-x86_64", "echo", "brctl"}
-
+	// check for prereqs
+	prereqs := []string{"brctl", "qemu-system-x86_64", "dnsmasq", "tunctl"}
 	servers := []string{}
 	for _, r := range c.View() {
 		err := check_prereqs(r, prereqs)
@@ -66,6 +66,10 @@ func main() {
 	if len(servers) > 0 {
 		abort("following servers missing prereqs: %v", servers)
 	}
+
+	debug("prereq check complete")
+	// set up remote networks
+
 }
 
 // runShell executes the shell command on the given host,
