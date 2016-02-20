@@ -6,5 +6,5 @@ docker-compose up
 ```
 attach to a container:
 ```
-./attach_to_CID {container id}
+./attach {container id}
 ```
