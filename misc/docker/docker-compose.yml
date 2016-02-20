@@ -1,5 +1,13 @@
 primary:
   build: . 
-  command: ["sh", "-c", "exec circuit start -a $$HOSTNAME:2233"]
+  command: ["sh", "-c", "exec circuit start -a $$HOSTNAME:3344"]
   volumes:
     - ../../:/opt/farmm 
+
+secondary_1:
+  build: . 
+  command: ["sh", "-c", "exec circuit start -a $$HOSTNAME:3344"]
+
+secondary_2:
+  build: . 
+  command: ["sh", "-c", "exec circuit start -a $$HOSTNAME:3344"]

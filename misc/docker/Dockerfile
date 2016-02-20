@@ -9,3 +9,7 @@ ENV GOPATH /go/workspace
 
 # build and install go circuit
 RUN go get github.com/jmcadden/circuit/cmd/circuit
+
+#enable udp broadcast
+RUN echo >> net.ipv4.icmp_echo_ignore_broadcasts = 0
+RUN sysctl -p
