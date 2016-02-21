@@ -1,5 +1,5 @@
 # proof of concept
-farmer proof-of-concept - configure remote machines for distributed app
+configure vlan between remote machines and run throughput benchmark
 ```
 $ go run main.go {circuit url}
 ```
