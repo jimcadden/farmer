@@ -3,7 +3,8 @@ FROM ubuntu:trusty
 RUN apt-get update -yqq
 RUN apt-get install -yqq git gcc golang \
 net-tools tcpdump iputils-ping \
-qemu-kvm bridge-utils dnsmasq
+qemu-kvm bridge-utils dnsmasq \
+iperf
 
 RUN mkdir -p /go/workspace/src
 ENV PATH $PATH:/go/golang/bin:/go/workspace/bin:/go/until

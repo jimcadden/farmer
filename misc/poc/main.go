@@ -11,12 +11,13 @@ Implements basic network isolation and VM allocation on a remote machine.
 Steps:
 - check remote prerequisites
 - set up networks
-- boot VM read stdout/stderr
+- run throughput tests
 
 */
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -55,7 +56,8 @@ func main() {
 	c := client.Dial(os.Args[1], nil)
 
 	// check for prereqs
-	prereqs := []string{"route", "brctl", "qemu-system-x86_64", "dnsmasq", "tunctl", "ip"}
+	prereqs := []string{"route", "brctl", "qemu-system-x86_64", "dnsmasq",
+		"ip", "iperf"}
 	servers := []string{}
 	for _, r := range c.View() {
 		err := check_prereqs(r, prereqs)
@@ -67,6 +69,7 @@ func main() {
 		abort("following servers missing prereqs: %v", servers)
 	}
 	debug("prereq check complete")
+
 	// set up networks
 	count := 0
 	for _, r := range c.View() {
@@ -75,18 +78,37 @@ func main() {
 		if err {
 			abort("[%s] network setup error: %v", r.ServerID(), err)
 		}
+		err = start_server(r, count)
+		if err {
+			abort("[%s] network setup error: %v", r.ServerID(), err)
+		}
 	}
-	debug("network setup complete")
-	//
-	//
+
+	// iperf test
+	for _, r := range c.View() {
+		host := r
+		count = 0
+		for count < 3 {
+			count += 1
+			next := (count % len(c.View())) + 1
+			// ids
+			ip_next := "10.0.0." + strconv.Itoa(next)
+			out, err := runShell(host, "iperf -c "+ip_next)
+			if err != nil || len(out) == 0 {
+				debug("[%s] iperf error %s ", host.ServerID(), err)
+			}
+			debug("[%s] \n %s ", host.ServerID(), out)
+		}
+	}
+
+	debug("Throughput test complete. Exiting")
+	// TODO: clean up perf servers
 }
 
 func setup_network(host client.Anchor, id int) bool {
 
-	//sid := host.ServerID()
 	// ids
 	ip_base := "10.0.0." + strconv.Itoa(id)
-	//ip_new := "10.0.1." + strconv.Itoa(id)
 	eth0 := "eth0"
 	eth00 := "eth0.1"
 	br0 := "br_poc"
@@ -100,20 +122,46 @@ func setup_network(host client.Anchor, id int) bool {
 	commands = append(commands, "ip link set "+br0+" up")
 	commands = append(commands, "ip addr add "+ip_base+"/24 dev "+br0)
 	commands = append(commands, "ip tuntap add dev "+tap0+" mode tap multi_queue")
-	//commands = append(commands, "ip addr add "+ip_new+"/24 dev "+tap0)
 	commands = append(commands, "ip link set "+tap0+" up")
 	commands = append(commands, "brctl addif "+br0+" "+tap0+" "+eth00)
 
 	for _, v := range commands {
 		cmd := v + orquit
-		out, err := runShell(host, cmd)
+		_, err := runShell(host, cmd)
 		debug("[%s] "+cmd, host.ServerID())
 		if err != nil {
 			debug("[%s] %s ", host.ServerID(), err)
-		} else {
-			debug("[%s] "+out, host.ServerID())
 		}
 	}
+	return false
+}
+
+func start_server(host client.Anchor, id int) bool {
+
+	debug("[%s] starting server ", host.ServerID())
+	job := host.Walk([]string{"iperf", "server"})
+	proc, _ := job.MakeProc(client.Cmd{
+		Path:  "/bin/sh",
+		Dir:   "/tmp",
+		Args:  []string{"-c", "iperf -s"},
+		Scrub: true,
+	})
+
+	go func() {
+		phase := proc.Peek().Phase
+		debug("[%s] iperf server "+phase, host.ServerID())
+		for phase == client.Running {
+			//XXX: no output sent to screen
+			scanner := bufio.NewScanner(proc.Stdout())
+			for scanner.Scan() {
+				text := scanner.Text()
+				debug("%v", text)
+			}
+		}
+		io.Copy(proc.Stdin(), bytes.NewBufferString(""))
+		proc.Stdin().Close() // Must close the standard input of the shell process.
+	}()
+
 	return false
 }
 
@@ -157,9 +205,6 @@ func check_prereqs(host client.Anchor, ps []string) (ret bool) {
 			debug("[%s] missing prereq %s ", host.ServerID(), v)
 			ret = true
 		}
-		//else {
-		//	debug("[%s] %s found at %s", host.ServerID(), v, strings.TrimSpace(out))
-		//}
 	}
 	return
 }
