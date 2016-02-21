@@ -1,13 +1,16 @@
 primary:
   build: . 
   command: ["sh", "-c", "exec circuit start -a $$HOSTNAME:3344"]
+  privileged: true
   volumes:
     - ../../:/opt/farmer
 
 secondary_1:
   build: . 
+  privileged: true
   command: ["sh", "-c", "exec circuit start -a $$HOSTNAME:3344"]
 
 secondary_2:
   build: . 
+  privileged: true
   command: ["sh", "-c", "exec circuit start -a $$HOSTNAME:3344"]
