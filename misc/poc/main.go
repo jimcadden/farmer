@@ -19,8 +19,8 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -29,16 +29,16 @@ import (
 )
 
 func abort(format string, arg ...interface{}) {
-	println("err:", fmt.Sprintf(format, arg...))
+	log.Printf(format, arg...)
 	os.Exit(1)
 }
 
 func printf(format string, arg ...interface{}) {
-	fmt.Printf(format, arg...)
+	log.Printf(format, arg...)
 }
 
 func debug(format string, arg ...interface{}) {
-	println("dbg:", fmt.Sprintf(format, arg...))
+	log.Printf(format, arg...)
 }
 
 //	usage: poc DIALIN_CIRCUIT_URL
