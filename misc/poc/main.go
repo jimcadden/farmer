@@ -17,9 +17,9 @@ Steps:
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -147,21 +147,20 @@ func start_server(host client.Anchor, id int) bool {
 		Scrub: true,
 	})
 
+	phase := proc.Peek().Phase
+	debug("[%s] iperf server "+phase, host.ServerID())
 	go func() {
-		phase := proc.Peek().Phase
-		debug("[%s] iperf server "+phase, host.ServerID())
-		for phase == client.Running {
-			//XXX: no output sent to screen
-			scanner := bufio.NewScanner(proc.Stdout())
-			for scanner.Scan() {
-				text := scanner.Text()
-				debug("%v", text)
+		debug("TEST OUTPUT START:")
+		for {
+			if b, err := ioutil.ReadAll(proc.Stdout()); err == nil {
+				debug("out[%s]", string(b))
 			}
 		}
-		io.Copy(proc.Stdin(), bytes.NewBufferString(""))
-		proc.Stdin().Close() // Must close the standard input of the shell process.
 	}()
 
+	io.Copy(proc.Stdin(), bytes.NewBufferString("\r\n"))
+
+	proc.Stdin().Close() // Must close the standard input of the shell process.
 	return false
 }
 
