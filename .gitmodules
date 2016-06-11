@@ -1,0 +1,6 @@
+[submodule "github.com/gocircuit/circuit"]
+	path = github.com/gocircuit/circuit
+	url = https://github.com/gocircuit/circuit.git
+[submodule "github.com/urfave/cli"]
+	path = github.com/urfave/cli
+	url = https://github.com/urfave/cli.git
